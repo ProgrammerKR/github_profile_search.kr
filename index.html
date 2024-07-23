@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile Search</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-sizing: border-box;
+            margin: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin: 0;
+        }
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-box input[type="text"] {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .search-box input[type="text"]:focus {
+            border-color: #007bff;
+        }
+        .search-box button {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .search-box button:hover {
+            background-color: #0056b3;
+        }
+        .profile-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease;
+            text-align: center;
+        }
+        .profile-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .profile-card img {
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            border: 2px solid #007bff;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .profile-card h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #333;
+        }
+        .profile-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .profile-card a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .profile-card a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: #d9534f;
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GitHub Profile Search</h1>
+        </div>
+        <div class="search-box">
+            <input type="text" id="username" placeholder="Enter GitHub username">
+            <button onclick="searchProfile()">Search</button>
+        </div>
+        <div id="profile-container"></div>
+        <div id="error-message" class="error"></div>
+    </div>
+
+    <script>
+        function searchProfile() {
+            const username = document.getElementById('username').value;
+            const profileContainer = document.getElementById('profile-container');
+            const errorMessage = document.getElementById('error-message');
+            
+            if (!username) {
+                errorMessage.textContent = 'Please enter a username';
+                profileContainer.innerHTML = '';
+                return;
+            }
+            
+            errorMessage.textContent = '';
+            profileContainer.innerHTML = 'Loading...';
+            
+            fetch(`https://api.github.com/users/${username}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('User not found');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    profileContainer.innerHTML = `
+                        <div class="profile-card">
+                            <img src="${data.avatar_url}" alt="${data.login}">
+                            <h2>${data.name || data.login}</h2>
+                            <p><strong>Username:</strong> ${data.login}</p>
+                            <p><strong>Followers:</strong> ${data.followers}</p>
+                            <p><strong>Following:</strong> ${data.following}</p>
+                            <p><strong>Repositories:</strong> ${data.public_repos}</p>
+                            <p><strong>Location:</strong> ${data.location || 'N/A'}</p>
+                            <p><strong>Bio:</strong> ${data.bio || 'N/A'}</p>
+                            <p><a href="${data.html_url}" target="_blank">View Profile</a></p>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    profileContainer.innerHTML = '';
+                    errorMessage.textContent = error.message;
+                });
+        }
+    </script>
+</body>
+</html>
